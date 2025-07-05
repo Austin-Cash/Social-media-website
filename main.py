@@ -9,10 +9,21 @@ from fastapi.security import OAuth2PasswordRequestForm
 from models import Post
 from auth import get_current_user
 from fastapi import Body
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
+app = FastAPI()
+
+# Allow CORS so the frontend can connect
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # later you can replace * with your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Dependency to get DB session
 def get_db():
