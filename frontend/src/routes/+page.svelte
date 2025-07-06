@@ -5,6 +5,7 @@
 
   import { token, username } from '$lib/store';
   import { getPosts, createPost, vote } from '$lib/api';
+  
 
   let posts = [];
   let content = '';
@@ -63,6 +64,7 @@
 
 <h1>Community Feed</h1>
 
+
 {#if $token}
   <p>Welcome, {$username}! <button on:click={logout}>Logout</button></p>
 
@@ -80,15 +82,21 @@
 {/if}
 
 <ul>
-  {#each posts as post}
-    <li>
+    {#each posts as post}
+  <div class="post">
+    <div class="vote-column">
+      <button on:click={() => upvote(post.id)}>⬆️</button>
+      <div>{post.votes}</div>
+      <button on:click={() => downvote(post.id)}>⬇️</button>
+    </div>
+    <div class="post-content">
       <p>{post.content}</p>
       {#if post.link}
         <a href={post.link} target="_blank">{post.link}</a>
       {/if}
-      <p>Votes: {post.votes}</p>
-      <button on:click={() => castVote(post.id, 1)}>⬆️</button>
-      <button on:click={() => castVote(post.id, -1)}>⬇️</button>
-    </li>
-  {/each}
+    </div>
+  </div>
+{/each}
+
+
 </ul>

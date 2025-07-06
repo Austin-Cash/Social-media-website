@@ -1,6 +1,7 @@
 <script>
   import { goto } from '$app/navigation';
   import { token, username as usernameStore } from '$lib/store';
+  
 
   let username = '';
   let password = '';
