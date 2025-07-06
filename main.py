@@ -72,7 +72,16 @@ def create_post(post: PostInput, db: Session = Depends(get_db), current_user: Us
 @app.get("/posts")
 def get_posts(db: Session = Depends(get_db)):
     posts = db.query(Post).order_by(Post.votes.desc()).all()
-    return posts
+    return [
+        {
+            "id": post.id,
+            "content": post.content,
+            "link": post.link,
+            "votes": post.votes,
+            "owner": post.owner.username  
+        }
+        for post in posts
+    ]
 
 @app.post("/vote")
 def vote_on_post(
@@ -91,5 +100,23 @@ def vote_on_post(
     db.commit()
     db.refresh(post)
     return {"msg": "Vote recorded", "post_id": post.id, "new_votes": post.votes}
+
+from fastapi import Path
+
+@app.delete("/posts/{post_id}")
+def delete_post(
+    post_id: int = Path(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    if post.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this post")
+    
+    db.delete(post)
+    db.commit()
+    return {"msg": "Post deleted"}
 
 

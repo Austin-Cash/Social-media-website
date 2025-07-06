@@ -59,6 +59,28 @@
     goto('/login');
   }
 
+  async function deletePost(id) {
+  const currentToken = get(token);
+  if (!currentToken) {
+    error = 'Login required to delete.';
+    return;
+  }
+
+  const res = await fetch(`http://localhost:8000/posts/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${currentToken}`
+    }
+  });
+
+  const data = await res.json();
+  if (res.ok) {
+    await loadPosts(); // refresh post list
+  } else {
+    error = data.detail || 'Delete failed.';
+  }
+}
+
   onMount(loadPosts);
 </script>
 
@@ -82,17 +104,22 @@
 {/if}
 
 <ul>
+  
+
     {#each posts as post}
   <div class="post">
     <div class="vote-column">
-      <button on:click={() => upvote(post.id)}>⬆️</button>
+      <button on:click={() => castVote(post.id, 1)}>⬆️</button>
       <div>{post.votes}</div>
-      <button on:click={() => downvote(post.id)}>⬇️</button>
+      <button on:click={() => castVote(post.id, -1)}>⬇️</button>
     </div>
     <div class="post-content">
       <p>{post.content}</p>
       {#if post.link}
         <a href={post.link} target="_blank">{post.link}</a>
+      {/if}
+      {#if $username === post.owner}
+        <button on:click={() => deletePost(post.id)}>🗑️ Delete</button>
       {/if}
     </div>
   </div>
